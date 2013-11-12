@@ -10,14 +10,15 @@ To install
 
 
 
+
  1. Ensure that GPG is installed and configured.
  2. Create a location to store a GPG directory for holding public keys.  You can use
-    the '--homedir dir' argument to tell GPG to use a particular location for its keyring.
+    the `--homedir dir` argument to tell GPG to use a particular location for its keyring.
     See `Note 1` below for a possible setup.
 
-    (Create a new keyring with only public keys, ie don't just use your own keyring
+    (Create a new keyring with only public keys; don't just use your own keyring
     containing your own private key, even if it is encrypted with a passphrase; it's
-    an additional risk to let it wander unecessarily. )
+    an additional risk to let that key be accessible unecessarily. )
 
     These instructions assume you already have a suitable PGP configuration.
     Info on creating a GPG keyring is beyond the scope of these instructions
@@ -28,7 +29,7 @@ To install
  3. Configure `/etc/gpg-mailgate.conf` based on the provided
     `gpg-mailgate.conf.sample`
  4. Place `gpg-mailgate.py` in `/usr/local/bin/`
- 5. Place the supplied GnuPG directory in `/usr/lib/python2.7/` (replace 2.7 with your
+ 5. Place the provided `GnuPG` directory in `/usr/lib/python2.7/` (replace 2.7 with your
     Python version)
  6. Add the following to `/etc/postfix/main.cf`
 
@@ -51,8 +52,8 @@ To install
  8. Restart postfix.
  9. Test/troubleshoot.
 
-    Send an email to an account you control, with a known public key in
-    the keyring from step 2.  The email should arrive encrypted.  Check
+    Send an email via postfix to an account you control, with a known public key in
+    the keyring from `Step 2`.  The email should arrive encrypted.  If not, check
     the logfile specified in config file, /etc/gpg-mailgate.conf.  If
     problems exist, try setting 'verbose = yes' in the config file to get
     more verbose logging.
