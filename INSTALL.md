@@ -1,12 +1,40 @@
- 1. Ensure that GPG is installed and configured. Also make sure public keys for
-    all of your potential recipients are available in the GPG home directory
-    used for `keyhome` in step 2.
- 2. Configure `/etc/gpg-mailgate.conf` based on the provided
+INSTALLING GPG-MAILGATE
+=======================
+
+GPG-mailgate is a mail filter, called by postfix, to encrypt email if
+a GPG public key is available.
+
+
+To install
+----------
+
+
+
+ 1. Ensure that GPG is installed and configured.
+ 2. Create a location to store a GPG directory for holding public keys.  You can use
+    the '--homedir dir' argument to tell GPG to use a particular location for its keyring.
+    See `Note 1` below for a possible setup.
+
+    (Create a new keyring with only public keys, ie don't just use your own keyring
+    containing your own private key, even if it is encrypted with a passphrase; it's
+    an additional risk to let it wander unecessarily. )
+
+    These instructions assume you already have a suitable PGP configuration.
+    Info on creating a GPG keyring is beyond the scope of these instructions
+    but you can start at http://www.gnupg.org/gph/en/manual.html
+
+    Make sure any public keys for your potential recipients are
+    stored in the GPG directory you use.
+ 3. Configure `/etc/gpg-mailgate.conf` based on the provided
     `gpg-mailgate.conf.sample`
- 3. Place `gpg-mailgate.py` in `/usr/local/bin/`
- 4. Place the GnuPG directory in `/usr/lib/python2.7/` (replace 2.7 with your
+ 4. Place `gpg-mailgate.py` in `/usr/local/bin/`
+ 5. Place the supplied GnuPG directory in `/usr/lib/python2.7/` (replace 2.7 with your
     Python version)
- 5. Add the following to the end of `/etc/postfix/master.cf`
+ 6. Add the following to `/etc/postfix/main.cf`
+
+        content_filter = gpg-mailgate
+
+ 7. Add the following to the end of `/etc/postfix/master.cf`
 
         gpg-mailgate    unix    -   n   n   -   -   pipe
             flags= user=nobody argv=/usr/local/bin/gpg-mailgate.py ${recipient}
@@ -20,12 +48,14 @@
             -o smtpd_recipient_restrictions=permit_mynetworks,reject
             -o mynetworks=127.0.0.0/8
             -o smtpd_authorized_xforward_hosts=127.0.0.0/8
+ 8. Restart postfix.
+ 9. Test/troubleshoot.
 
- 6. Add the following to `/etc/postfix/main.cf`
-
-        content_filter = gpg-mailgate
-
- 7. Restart postfix.
+    Send an email to an account you control, with a known public key in
+    the keyring from step 2.  The email should arrive encrypted.  Check
+    the logfile specified in config file, /etc/gpg-mailgate.conf.  If
+    problems exist, try setting 'verbose = yes' in the config file to get
+    more verbose logging.
 
 
 ## Note 1
