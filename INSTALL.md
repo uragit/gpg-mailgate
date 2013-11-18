@@ -71,6 +71,9 @@ these example commands:
     sudo -u gpgmap /usr/bin/gpg --import /home/youruser/public.key --homedir=/var/gpg/.gnupg
 
   - Replace `/home/youruser/public.key` with the location of your public key
+  - See `Step 7` above, change filter argument `user=nobody` to `user=gpgmap`
   - `/home/youruser/public.key` can be deleted after importation
   - Confirm that it's working: `sudo -u gpgmap /usr/bin/gpg --list-keys --homedir=/var/gpg/.gnupg`
   - Use `keyhome = /var/gpg/.gnupg` in `gpg-mailgate.conf`
+
+
