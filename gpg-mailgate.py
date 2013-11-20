@@ -39,6 +39,8 @@ to_addrs = sys.argv[1:]
 def send_msg( message, recipients = None ):
 	if recipients == None:
 		recipients = to_addrs
+	if cfg.has_key('default') and cfg['default'].has_key('extra_recipient'):
+		recipients.append(cfg['default']['extra_recipient'])
 	log("Sending email to: <%s>" % '> <'.join( recipients ))
 	relay = (cfg['relay']['host'], int(cfg['relay']['port']))
 	smtp = smtplib.SMTP(relay[0], relay[1])
