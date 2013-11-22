@@ -36,6 +36,10 @@ raw_message = email.message_from_string( raw )
 from_addr = raw_message['From']
 to_addrs = sys.argv[1:]
 
+if verbose:
+	log("")
+	log("gpg-mailgate starting.  Recipient list: <%s>" % '> <'.join( to_addrs ))
+
 def send_msg( message, recipients = None ):
 	if recipients == None:
 		recipients = to_addrs
@@ -47,6 +51,8 @@ def send_msg( message, recipients = None ):
 	smtp.sendmail( from_addr, recipients, message.as_string() )
 
 def encrypt_payload( payload, gpg_to_cmdline ):
+	if verbose:
+		log("Encrypting payload to recipients: %s" % ', '.join( gpg_to_cmdline ))
 	raw_payload = payload.get_payload(decode=True)
 	if "-----BEGIN PGP MESSAGE-----" in raw_payload and "-----END PGP MESSAGE-----" in raw_payload:
 		return payload
@@ -100,7 +106,7 @@ for to in to_addrs:
 		gpg_to.append( (to, cfg['keymap'][to]) )
 	else:
 		if verbose:
-			log("Recipient (%s) not in domain list." % to)
+			log("Recipient (%s) not in keymap list." % to)
 		ungpg_to.append(to)
 
 if gpg_to == list():
