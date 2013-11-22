@@ -54,7 +54,9 @@ def encrypt_payload( payload, gpg_to_cmdline ):
 	if verbose:
 		log("Encrypting payload to recipients: %s" % ', '.join( gpg_to_cmdline ))
 	raw_payload = payload.get_payload(decode=True)
-	if "-----BEGIN PGP MESSAGE-----" in raw_payload and "-----END PGP MESSAGE-----" in raw_payload:
+	if re.search(r'^-----BEGIN PGP MESSAGE-----', raw_payload, re.M) and re.search(r'^-----END PGP MESSAGE-----', raw_payload, re.M):
+		if verbose:
+			log("Declining to encrypt payload containing inline PGP markers.")
 		return payload
 	gpg = GnuPG.GPGEncryptor( cfg['gpg']['keyhome'], gpg_to_cmdline, payload.get_content_charset() )
 	gpg.update( raw_payload )
