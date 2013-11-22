@@ -60,7 +60,10 @@ def encrypt_payload( payload, gpg_to_cmdline ):
 		return payload
 	gpg = GnuPG.GPGEncryptor( cfg['gpg']['keyhome'], gpg_to_cmdline, payload.get_content_charset() )
 	gpg.update( raw_payload )
-	payload.set_payload( gpg.encrypt() )
+	encrypted_data, returncode =gpg.encrypt()
+	if verbose:
+		log("Return code from encryption=%d (0 indicates success)." % returncode)
+	payload.set_payload( encrypted_data )
 	
 	isAttachment = payload.get_param( 'attachment', None, 'Content-Disposition' ) is not None
 	

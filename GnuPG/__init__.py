@@ -30,7 +30,7 @@ class GPGEncryptor:
 	def encrypt(self):
 		p = subprocess.Popen( self._command(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE )
 		encdata = p.communicate(input=self._message)[0]
-		return encdata
+		return (encdata, p.returncode)
 
 	def _command(self):
 		cmd = ["/usr/bin/gpg", "--trust-model", "always", "--homedir", self._keyhome, "--batch", "--yes", "--pgp7", "--no-secmem-warning", "--armor", "--encrypt"]
