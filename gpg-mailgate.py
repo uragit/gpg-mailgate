@@ -105,10 +105,16 @@ gpg_to = list()
 ungpg_to = list()
 
 for to in to_addrs:
-	if to in keys and not ( cfg['default'].has_key('keymap_only') and cfg['default']['keymap_only'] == 'yes'  ):
+	if to in keys.values() and not ( cfg['default'].has_key('keymap_only') and cfg['default']['keymap_only'] == 'yes'  ):
 		gpg_to.append( (to, to) )
 	elif cfg.has_key('keymap') and cfg['keymap'].has_key(to):
-		gpg_to.append( (to, cfg['keymap'][to]) )
+		log("Keymap has key '%s'" % cfg['keymap'][to] )
+		# Check we've got a matching key!  If not, decline to attempt encryption.
+		if not keys.has_key(cfg['keymap'][to]):
+			log("Key '%s' in keymap not found in keyring for email address '%s'.  Won't encrypt." % (cfg['keymap'][to], to))
+			ungpg_to.append(to)
+		else:
+			gpg_to.append( (to, cfg['keymap'][to]) )
 	else:
 		if verbose:
 			log("Recipient (%s) not in keymap list." % to)

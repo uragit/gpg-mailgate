@@ -5,14 +5,14 @@ def public_keys( keyhome ):
 	cmd = ['/usr/bin/gpg', '--homedir', keyhome, '--list-keys', '--with-colons']
 	p = subprocess.Popen( cmd, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
 	p.wait()
-	keys = list()
+	keys = dict()
 	for line in p.stdout.readlines():
 		if line[0:3] == 'uid' or line[0:3] == 'pub':
 			if ('<' not in line or '>' not in line):
 				continue
-			key = line.split('<')[1].split('>')[0]
-			if keys.count(key) == 0:
-				keys.append(key)
+			email = line.split('<')[1].split('>')[0]
+			fingerprint = line.split(':')[4]
+			keys[fingerprint] = email
 	return keys
 
 class GPGEncryptor:
