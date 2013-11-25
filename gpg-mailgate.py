@@ -2,6 +2,7 @@
 
 from ConfigParser import RawConfigParser
 from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
 import email
 import email.message
 import re
@@ -87,7 +88,44 @@ def encrypt_payload( payload, gpg_to_cmdline ):
 def encrypt_all_payloads( message, gpg_to_cmdline ):
 	encrypted_payloads = list()
 	if type( message.get_payload() ) == str:
-		return encrypt_payload( message, gpg_to_cmdline ).get_payload()
+		if cfg.has_key('default') and cfg['default'].has_key('mime_conversion') and cfg['default']['mime_conversion'] == 'yes':
+			# Convert a plain text email into PGP/MIME attachment style.  Modeled after enigmail.
+			submsg1=email.message.Message()
+			submsg1.set_payload("Version: 1\n")
+			submsg1.set_type("application/pgp-encrypted")
+			submsg1.set_param('PGP/MIME version identification', "", 'Content-Description' )
+			
+			submsg2=email.message.Message()
+			submsg2.set_type("application/octet-stream")
+			submsg2.set_param('name', "encrypted.asc")
+			submsg2.set_param('OpenPGP encrypted message', "", 'Content-Description' )
+			submsg2.set_param('inline', "",                'Content-Disposition' )
+			submsg2.set_param('filename', "encrypted.asc", 'Content-Disposition' )
+			
+			# WTF!  It seems to swallow the first line.  Not sure why.  Perhaps
+			# it's skipping an imaginary blank line someplace. (ie skipping a header)
+			# Workaround it here by prepending a blank line.
+			submsg2.set_payload("\n"+message.get_payload())
+
+			message.preamble="This is an OpenPGP/MIME encrypted message (RFC 2440 and 3156)"
+			
+			# Use this just to generate a MIME boundary string.
+			junk_msg = MIMEMultipart()
+			junk_str=junk_msg.as_string()  # WTF!  Without this, get_boundary() will return 'None'!
+			boundary=junk_msg.get_boundary()
+
+		        # This also modifies the boundary in the body of the message, ie it gets parsed.
+			if message.has_key('Content-Type'):
+				message.replace_header('Content-Type', "multipart/encrypted; protocol=\"application/pgp-encrypted\";\nboundary=\"%s\"\n" % boundary)
+			else:
+				message['Content-Type']="multipart/encrypted; protocol=\"application/pgp-encrypted\";\nboundary=\"%s\"\n" % boundary
+
+			return [ submsg1, encrypt_payload( submsg2, gpg_to_cmdline) ]
+		else:
+			# Do a simple in-line PGP conversion of a plain text email.
+			return encrypt_payload( message, gpg_to_cmdline ).get_payload()
+
+
 	for payload in message.get_payload():
 		if( type( payload.get_payload() ) == list ):
 			encrypted_payloads.extend( encrypt_all_payloads( payload, gpg_to_cmdline ) )

@@ -11,6 +11,10 @@ keymap_only = no
 # This will add an extra recipient to all sendmail events.  Useful for testing.
 #extra_recipient = user@example.com
 
+# Convert encrypted text/plain email to MIME-attached encrypt style.
+# (Default is to use older inline-style PGP encoding.)
+mime_conversion = yes
+
 [gpg]
 # the directory where gpg-mailgate public keys are stored
 # (see INSTALL for details)
